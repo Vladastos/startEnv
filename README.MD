@@ -1,5 +1,5 @@
 #  Setup
-`wget -O - https://raw.githubusercontent.com/Vladastos/startEnv/main/setup.bash | sudo bash`
+`bash <(wget -qO- https://raw.githubusercontent.com/Vladastos/startEnv/main/setup.bash)`
 
 
 # Usage
