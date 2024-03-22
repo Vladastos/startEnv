@@ -1,0 +1,20 @@
+{
+  "environments": [
+    {
+      "environmentName": "",
+      "windows": [
+        {
+          "name": "",
+          "cmd": [
+            ""
+          ],
+          "style": ""
+        }
+      ],
+      "options": { "titleScreen": {
+        "title":"",
+        "style":""
+      } }
+    }
+  ]
+}
