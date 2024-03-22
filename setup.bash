@@ -15,12 +15,10 @@ function log() {
 
 log "INFO" "Installing startEnv..."
 #check if startEnv is already installed
-if [ -d ~/.config/startEnv ] ; then
-    echo "startEnv already installed"
-    exit
-fi
+
+
 #if not clone the repo 
-if [ ! -d ~/.config/startEnv ] ; then
+if [ ! -d ~/.config/startEnv/scripts ] ; then
     log "INFO" "Creating directory..."
     mkdir -p ~/.config/startEnv/scripts
     cd ~/.config/startEnv/scripts || exit
@@ -28,7 +26,7 @@ if [ ! -d ~/.config/startEnv ] ; then
     wget https://raw.githubusercontent.com/Vladastos/startEnv/main/scripts/startEnv.py
     chmod +x ~/.config/startEnv/startEnv.py
 else :
-    echo "startEnv already installed"
+    log "INFO" "startEnv already installed"
 fi
 
 #check if config file is present, if not clone from repo
@@ -40,7 +38,6 @@ if [ ! -f .config/startEnv/config.json ]; then
     wget https://raw.githubusercontent.com/Vladastos/startEnv/main/config/config.json
 else :
     log "INFO" "Config file already present"
-    echo "Config file found"
 fi
 
 
@@ -70,4 +67,5 @@ if ! (command -v figlet &> /dev/null) then
     sudo apt install figlet
 
 fi
+
 log "INFO" "startEnv installed successfully!"
