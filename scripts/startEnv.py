@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 import json
 import os
 import sys
@@ -40,17 +39,16 @@ def sendCommands(windows):
     for windowNumber, window in enumerate(windows):
         pane_name=window['name']
         pane_style=window['style']
-        os.system(f'tmux select-pane -t {window["name"]} -T {pane_name}')
+        os.system(f'tmux select-pane -T "{pane_name}" -t {windowNumber} ')
+        print(f'tmux select-pane -T "{pane_name}" -t {windowNumber} ')
         for commandNumber, command in enumerate(window['cmd']):
             if command == '':
                 continue
-            log(f"Sending command '{command}' to pane '{window['name']}'")
             os.system(f'tmux send-keys -t {windowNumber} "{command}" C-m')
 
 def setTitleScreen(titleOptions):
     if 'title' not in titleOptions or titleOptions['title'] == '':
         titleOptions['title'] = argument
-    log(f"Setting title screen to '{titleOptions}'")
     os.system(f'tmux split-window -v -f -b -p 25')
     os.system(f'tmux select-pane -t 0 -T {titleOptions["title"]}')
     os.system(f'tmux send-keys -t 0 "figlet {titleOptions["title"]} -t -c" C-m')
