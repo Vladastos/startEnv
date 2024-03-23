@@ -1,5 +1,11 @@
 #!/bin/bash
 
+dependencies=("python3" "git" "wget" "tmux" "figlet")
+
+HOME_CONFIG_DIR="/home/$(logname)/.config/startEnv"
+SCRIPTS_DIR="${HOME_CONFIG_DIR}/scripts"
+CONFIG_DIR="${HOME_CONFIG_DIR}/config"
+
 function log() {
   local log_level=$1
   shift
@@ -9,8 +15,8 @@ function log() {
 }
 
 function download_script(){
-  mkdir -p "/home/$(logname)"/.config/startEnv/scripts
-  cd "/home/$(logname)"/.config/startEnv/scripts || exit
+  mkdir -p "$SCRIPTS_DIR"
+  cd "$SCRIPTS_DIR" || exit
   log "INFO" "Downloading startEnv..."
   wget -q https://raw.githubusercontent.com/Vladastos/startEnv/main/scripts/startEnv.py
 }
@@ -29,74 +35,41 @@ function prompt_user_and_execute() {
   esac
 }
 
-function install_tmux(){
-  log "INFO" "Installing tmux..."
-  sudo apt-get --yes install tmux > /dev/null
+function install(){
+  local package=$1
+  if ! (command -v "$package" &> /dev/null) then
+    log "INFO" "Installing $1..."
+    sudo apt-get --yes install "$1" > /dev/null
+  else :
+    log "INFO" "$1 already installed"
+  fi
 }
 
-function install_figlet(){
-  log "INFO" "Installing figlet..."
-  sudo apt-get --yes install figlet > /dev/null 
+function install_dependencies(){
+  local dependencies=("$@")
+  for dep in "${dependencies[@]}"; do
+    install "$dep"
+  done
 }
 
-# Usage examples:
-# log "INFO" "This is an informational message"
-# log "ERROR" "This is an error message"
-# log "DEBUG" "This is a debug message"
+prompt_user_and_execute "Do you want to install dependencies?" install_dependencies "${dependencies[@]}"
 
-log "INFO" "Installing startEnv..."
+log "INFO" "Starting setup..."
 
 
-#if not clone the repo 
-if [ ! -f /home/"$(logname)"/.config/startEnv/scripts/startEnv.py  ] ; then
-    log "INFO" "startEnv not installed"
-    prompt_user_and_execute "Do you want to clone the repo?" download_script
-else :
-    log "INFO" "startEnv.py already installed"
-fi
-#check if config file is present, if not clone from repo
-
-log "INFO" "Checking if config file is present..."
-if [ ! -f /home/"$(logname)"/.config/startEnv/config/config.json ] ; then
-    log "INFO" "Creating config file..."
-    mkdir -p "/home/$(logname)"/.config/startEnv/config
-    cd "/home/$(logname)"/.config/startEnv/config || exit
-    wget -q https://raw.githubusercontent.com/Vladastos/startEnv/main/config/config.json
-else :
-  log "INFO" "Config file already present"
+if [ ! -f "${SCRIPTS_DIR}/startEnv.py" ]; then
+  prompt_user_and_execute "Do you want to download startEnv.py?" download_script
 fi
 
-#check if alias is present in .bash_aliases, if not create
-log "INFO" "Checking if alias is present in .bash_aliases..."
-if ! grep -q "startEnv()" "/home/$(logname)"/.bash_aliases; then
-  echo "
-  startEnv(){
-    python3 /home/$(logname)/.config/startEnv/scripts/startEnv.py \"\$1\"
-  }" >> "/home/$(logname)"/.bash_aliases
-else :
-    log "INFO" "Alias already present"
+if [ ! -f "${CONFIG_DIR}/config.json" ]; then
+  mkdir -p "$CONFIG_DIR"
+  cd "$CONFIG_DIR" || exit
+  wget -q https://raw.githubusercontent.com/Vladastos/startEnv/main/config/config.json
 fi
 
-#install the dependencies
-
-##check if tmux is installed, if not install
-log "INFO" "Checking if tmux is installed..."
-if ! (command -v tmux &> /dev/null) then
-    prompt_user_and_execute "Do you want to install tmux?" install_tmux
-    else :
-        log "INFO" "Tmux already installed"
-
-fi
-
-
-
-##check if figlet is installed, if not install
-log "INFO" "Checking if figlet is installed..."
-if ! (command -v figlet &> /dev/null) then
-    log "INFO" "figlet not installed"
-    prompt_user_and_execute "Do you want to install figlet?" install_figlet
-else :
-    log "INFO" "figlet already installed"
+if ! grep -q "startEnv()" "$HOME/.bash_aliases"; then
+  echo "startEnv(){ python3 ${SCRIPTS_DIR}/startEnv.py \$1 }" >> "$HOME/.bash_aliases"
+  prompt_user_and_execute "Source .bash_aliases?" "unalias -a && . $HOME/.bashrc"
 fi
 
 log "INFO" "startEnv installed successfully!"
