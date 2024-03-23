@@ -5,9 +5,12 @@ import os
 import sys
 
 argument = sys.argv[1] if len(sys.argv) > 1 else None
-if argument is None:
+if argument is None or argument == "" or argument == " ":
     print("Please provide an environment name")
     sys.exit(1)
+if argument == "-v":
+    print("Version 0.0.2")
+    sys.exit(0)
 
 def log(message, level='info'):
     """
@@ -39,10 +42,14 @@ def sendCommands(windows):
         pane_style=window['style']
         os.system(f'tmux select-pane -t {window["name"]} -T {pane_name}')
         for commandNumber, command in enumerate(window['cmd']):
+            if command == '':
+                continue
             log(f"Sending command '{command}' to pane '{window['name']}'")
             os.system(f'tmux send-keys -t {windowNumber} "{command}" C-m')
 
 def setTitleScreen(titleOptions):
+    if 'title' not in titleOptions or titleOptions['title'] == '':
+        titleOptions['title'] = argument
     log(f"Setting title screen to '{titleOptions}'")
     os.system(f'tmux split-window -v -f -b -p 25')
     os.system(f'tmux select-pane -t 0 -T {titleOptions["title"]}')
@@ -57,25 +64,33 @@ def readConfig():
     with open(os.path.expanduser('~/.config/startEnv/config/config.json'), 'r') as config_file:
         config = json.load(config_file)
     return config
-    
+
+def getEnvironment(config, environmentName):
+    for environment in config['environments']:
+        if environment['environmentName'] == environmentName:
+            return environment
+    return None
 config_data = readConfig()
+environment = getEnvironment(config_data, argument)
 
 if not config_data or not 'environments' in config_data:
     log('config file is empty')
-    config_data = {}
+    sys.exit(1)
 
-for environment in config_data['environments']:
-    if environment['environmentName'] == argument:
-        # Check if tmux has session named environmentName
-        if not os.system(f'tmux has-session -t {environment["environmentName"]} 2>/dev/null') == 0:
-            log(f"Session '{environment['environmentName']}' does not exist, creating it")
-            # Create a new tmux session
-            os.system(f'tmux new-session -d -s {environment["environmentName"]}')
-            splitPanes(len(environment['windows']))
-            # Send commands
-            sendCommands(environment['windows'])
-            #Set title pane
-            if 'titleScreen' in environment['options']:
-                setTitleScreen(environment['options']['titleScreen'])
-        log(f"Attaching to session '{environment['environmentName']}'")
-        os.system(f'tmux attach -t {environment["environmentName"]}')
+if not environment:
+    log('No environment with given name found in config file')
+    sys.exit(1)
+
+# Check if tmux has session named environmentName
+if not os.system(f'tmux has-session -t {environment["environmentName"]} 2>/dev/null') == 0:
+    log(f"Session '{environment['environmentName']}' does not exist, creating it")
+    # Create a new tmux session
+    os.system(f'tmux new-session -d -s {environment["environmentName"]}')
+    splitPanes(len(environment['windows']))
+    # Send commands
+    sendCommands(environment['windows'])
+    #Set title pane
+    if 'titleScreen' in environment['options']:
+        setTitleScreen(environment['options']['titleScreen'])
+log(f"Attaching to session '{environment['environmentName']}'")
+os.system(f'tmux attach -t {environment["environmentName"]}')

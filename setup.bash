@@ -1,11 +1,14 @@
 #!/bin/bash
 
-dependencies=("python3" "git" "wget" "tmux" "figlet")
+DEPENDENCIES=("python3" "git" "wget" "tmux" "figlet")
 
 HOME_CONFIG_DIR="/home/$(logname)/.config/startEnv"
 SCRIPTS_DIR="${HOME_CONFIG_DIR}/scripts"
 CONFIG_DIR="${HOME_CONFIG_DIR}/config"
-
+ALIAS="
+startEnv(){
+  python3 ${SCRIPTS_DIR}/startEnv.py \"\$1\"
+}"
 function log() {
   local log_level=$1
   shift
@@ -46,14 +49,13 @@ function install(){
 }
 
 function install_dependencies(){
-  local dependencies=("$@")
-  for dep in "${dependencies[@]}"; do
+  log "INFO" "Installing dependencies..."
+  for dep in "${DEPENDENCIES[@]}"; do
     install "$dep"
   done
 }
 
-prompt_user_and_execute "Do you want to install dependencies?" install_dependencies "${dependencies[@]}"
-
+prompt_user_and_execute "Do you want to install dependencies?" install_dependencies
 log "INFO" "Starting setup..."
 
 
@@ -68,8 +70,7 @@ if [ ! -f "${CONFIG_DIR}/config.json" ]; then
 fi
 
 if ! grep -q "startEnv()" "$HOME/.bash_aliases"; then
-  echo "startEnv(){ python3 ${SCRIPTS_DIR}/startEnv.py \$1 }" >> "$HOME/.bash_aliases"
-  prompt_user_and_execute "Source .bash_aliases?" "unalias -a && . $HOME/.bashrc"
+  echo "$ALIAS" >> "$HOME"/.bash_aliases
 fi
 
 log "INFO" "startEnv installed successfully!"
