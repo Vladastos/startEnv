@@ -2,7 +2,7 @@
 
 Incoming features and development plans.
 
-## Custom tmux config
+## Custom tmux config (done) 
 Add a custom tmux config file to the repository. This file will be downloaded into the startEnv folder, thus not interfering with the default config.
 It will be loaded at the start of every tmux session started by startEnv.
 The custom tmux config will be enabled by default and can be disabled with the `disable_custom_tmux_config` flag in the config file.
