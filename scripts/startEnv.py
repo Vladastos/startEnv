@@ -83,7 +83,7 @@ if not environment:
 if not os.system(f'tmux has-session -t {environment["environmentName"]} 2>/dev/null') == 0:
     log(f"Session '{environment['environmentName']}' does not exist, creating it")
     # Create a new tmux session
-    os.system(f'tmux new-session -d -s {environment["environmentName"]}')
+    os.system(f'tmux -f ~/.config/startEnv/config/tmux.conf -L {environment["environmentName"]} new-session -d -s {environment["environmentName"]}')
     splitPanes(len(environment['panes']))
     # Send commands
     sendCommands(environment['panes'])
@@ -91,4 +91,4 @@ if not os.system(f'tmux has-session -t {environment["environmentName"]} 2>/dev/n
     if 'titleScreen' in environment['options']:
         setTitleScreen(environment['options']['titleScreen'])
 log(f"Attaching to session '{environment['environmentName']}'")
-os.system(f'tmux attach -t {environment["environmentName"]}')
+os.system(f'tmux -L {environment["environmentName"]} attach -t {environment["environmentName"]}')
