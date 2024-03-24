@@ -35,16 +35,16 @@ def splitPanes(number):
     
     os.system(f'tmux select-layout tiled')
 
-def sendCommands(windows):
-    for windowNumber, window in enumerate(windows):
-        pane_name=window['name']
-        pane_style=window['style']
-        os.system(f'tmux select-pane -T "{pane_name}" -t {windowNumber} ')
-        print(f'tmux select-pane -T "{pane_name}" -t {windowNumber} ')
-        for commandNumber, command in enumerate(window['cmd']):
+def sendCommands(panes):
+    for paneNumber, pane in enumerate(panes):
+        pane_name=pane['name']
+        pane_style=pane['style']
+        os.system(f'tmux select-pane -T "{pane_name}" -t {paneNumber} ')
+        print(f'tmux select-pane -T "{pane_name}" -t {paneNumber} ')
+        for commandNumber, command in enumerate(pane['cmd']):
             if command == '':
                 continue
-            os.system(f'tmux send-keys -t {windowNumber} "{command}" C-m')
+            os.system(f'tmux send-keys -t {paneNumber} "{command}" C-m')
 
 def setTitleScreen(titleOptions):
     if 'title' not in titleOptions or titleOptions['title'] == '':
@@ -84,9 +84,9 @@ if not os.system(f'tmux has-session -t {environment["environmentName"]} 2>/dev/n
     log(f"Session '{environment['environmentName']}' does not exist, creating it")
     # Create a new tmux session
     os.system(f'tmux new-session -d -s {environment["environmentName"]}')
-    splitPanes(len(environment['windows']))
+    splitPanes(len(environment['panes']))
     # Send commands
-    sendCommands(environment['windows'])
+    sendCommands(environment['panes'])
     #Set title pane
     if 'titleScreen' in environment['options']:
         setTitleScreen(environment['options']['titleScreen'])

@@ -1,10 +1,15 @@
 #!/bin/bash
 
-DEPENDENCIES=("python3" "git" "wget" "tmux" "figlet")
+DEPENDENCIES=("python3" "pip" "git" "wget" "tmux" "figlet")
 
-HOME_CONFIG_DIR="/home/$(logname)/.config/startEnv"
+HOME_CONFIG_DIR="/home/$(logname)/.config"
+REMOTE_DIR="https://raw.githubusercontent.com/Vladastos/startEnv/main"
 SCRIPTS_DIR="${HOME_CONFIG_DIR}/scripts"
+REMOTE_SCRIPTS_DIR="${REMOTE_DIR}/scripts"
 CONFIG_DIR="${HOME_CONFIG_DIR}/config"
+REMOTE_CONFIG_DIR="$REMOTE_DIR/config"
+TMUX_CONFIG_DIR="${HOME_CONFIG_DIR}/tmux"
+REMOTE_TMUX_CONFIG_DIR="${REMOTE_DIR}/tmux"
 ALIAS="
 startEnv(){
   python3 ${SCRIPTS_DIR}/startEnv.py \"\$1\"
@@ -21,7 +26,7 @@ function download_script(){
   mkdir -p "$SCRIPTS_DIR"
   cd "$SCRIPTS_DIR" || exit
   log "INFO" "Downloading startEnv..."
-  wget -q https://raw.githubusercontent.com/Vladastos/startEnv/main/scripts/startEnv.py
+  wget -q "$REMOTE_SCRIPTS_DIR/startEnv.py"
 }
 
 function prompt_user_and_execute() {
@@ -55,6 +60,18 @@ function install_dependencies(){
   done
 }
 
+#TODO: add tmux config 
+function create_tmux_config(){
+  log "INFO" "Creating tmux config..."
+  mkdir -p "$TMUX_CONFIG_DIR"
+  cd "$TMUX_CONFIG_DIR" || exit
+  wget -q "$REMOTE_TMUX_CONFIG_DIR/tmux.conf"
+  #install tpm
+  if [ ! -d ~/.tmux/plugins/tpm ]; then
+    git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
+  fi
+}
+
 prompt_user_and_execute "Do you want to install dependencies?" install_dependencies
 log "INFO" "Starting setup..."
 
@@ -66,11 +83,14 @@ fi
 if [ ! -f "${CONFIG_DIR}/config.json" ]; then
   mkdir -p "$CONFIG_DIR"
   cd "$CONFIG_DIR" || exit
-  wget -q https://raw.githubusercontent.com/Vladastos/startEnv/main/config/config.json
+  wget -q "$REMOTE_CONFIG_DIR/config.json"
 fi
 
 if ! grep -q "startEnv()" "$HOME/.bash_aliases"; then
   echo "$ALIAS" >> "$HOME"/.bash_aliases
 fi
+
+prompt_user_and_execute "Do you want startEnv to create it's own tmux config? (it will be placed in a separate folder and will not interfere with your config)" create_tmux_config
+
 
 log "INFO" "startEnv installed successfully!"

@@ -2,7 +2,7 @@
   "environments": [
     {
       "environmentName": "",
-      "windows": [
+      "panes": [
         {
           "name": "",
           "cmd": [
@@ -11,10 +11,13 @@
           "style": ""
         }
       ],
-      "options": { "titleScreen": {
+      "pane_options": { "titleScreen": {
         "title":"",
         "style":""
       } }
     }
-  ]
+  ],
+  "options":{
+    "disable_custom_tmux_config": false
+  }
 }
