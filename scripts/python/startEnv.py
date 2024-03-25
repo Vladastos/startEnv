@@ -1,10 +1,7 @@
 #!/usr/bin/env python3
-# PYTHON_ARGCOMPLETE_OK
-
 import json
 import os
 import sys
-import argcomplete
 import argparse
 
 parser = argparse.ArgumentParser(description='Start an environment')
@@ -22,28 +19,27 @@ def splitPanes(number):
     print(f"Splitting {number} panes")
     for i in range(number):
         if i > 0:
-            os.system(f'tmux split-window -h')
+            os.system(f'tmux -L startEnv split-window -h')
     
-    os.system(f'tmux select-layout tiled')
+    os.system(f'tmux -L startEnv select-layout tiled')
 
-def sendCommands(panes):
-    for paneNumber, pane in enumerate(panes):
-        pane_name=pane['name']
-        pane_style=pane['style']
-        os.system(f'tmux select-pane -T "{pane_name}" -t {paneNumber} ')
-        print(f'tmux select-pane -T "{pane_name}" -t {paneNumber} ')
-        for command in enumerate(pane['cmd']):
+def sendCommands(windows):
+    for windowNumber, window in enumerate(windows):
+        pane_name=window['name']
+        pane_style=window['style']
+        os.system(f'tmux -L startEnv select-pane -T "{pane_name}" -t {windowNumber} ')
+        for commandNumber, command in enumerate(window['cmd']):
             if command == '':
                 continue
-            os.system(f'tmux send-keys -t {paneNumber} "{command}" C-m')
+            os.system(f'tmux -L startEnv send-keys -t {windowNumber} "{command}" C-m')
 
 def setTitleScreen(titleOptions):
     if 'title' not in titleOptions or titleOptions['title'] == '':
-        titleOptions['title'] = args.environment_name 
-    os.system(f'tmux split-window -v -f -b -p 25')
-    os.system(f'tmux select-pane -t 0 -T {titleOptions["title"]}')
-    os.system(f'tmux send-keys -t 0 "figlet {titleOptions["title"]} -t -c" C-m')
-    #os.system(f'tmux send-keys -t 0 "figlet -d ~/figlet/figlet-fonts-master -f 3d  {titleOptions["title"]} -t -c" C-m')
+        titleOptions['title'] = argument
+    os.system(f'tmux -L startEnv split-window -v -f -b -p 25')
+    os.system(f'tmux -L startEnv select-pane -t 0 -T {titleOptions["title"]}')
+    os.system(f'tmux -L startEnv send-keys -t 0 "figlet {titleOptions["title"]} -t -c" C-m')
+    #os.system(f'tmux -L startEnv send-keys -t 0 "figlet -d ~/figlet/figlet-fonts-master -f 3d  {titleOptions["title"]} -t -c" C-m')
 
 def readConfig():
     log('Reading config file')
@@ -71,10 +67,10 @@ if not environment:
     sys.exit(1)
 
 # Check if tmux has session named environmentName
-if not os.system(f'tmux has-session -t {environment["environmentName"]} 2>/dev/null') == 0:
+if not os.system(f'tmux -L startEnv has-session -t {environment["environmentName"]} 2>/dev/null') == 0:
     log(f"Session '{environment['environmentName']}' does not exist, creating it")
     # Create a new tmux session
-    os.system(f'tmux -f ~/.config/startEnv/config/tmux.conf new-session -d -s {environment["environmentName"]}')
+    os.system(f'tmux -f ~/.config/startEnv/tmux/tmux.conf -L startEnv new-session -d -s {environment["environmentName"]}')
     splitPanes(len(environment['panes']))
     # Send commands
     sendCommands(environment['panes'])
@@ -82,4 +78,4 @@ if not os.system(f'tmux has-session -t {environment["environmentName"]} 2>/dev/n
     if 'titleScreen' in environment['pane_options']:
         setTitleScreen(environment['pane_options']['titleScreen'])
 log(f"Attaching to session '{environment['environmentName']}'")
-os.system(f'tmux attach -t {environment["environmentName"]}')
+os.system(f'tmux -L startEnv attach -t {environment["environmentName"]}')
