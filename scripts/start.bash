@@ -13,4 +13,4 @@ fi
 
 # start the script
 . "${SCRIPTS_DIR}"/python/venv/bin/activate
-python3 "${SCRIPTS_DIR}"/python/startEnv.py
+python3 "${SCRIPTS_DIR}"/python/startEnv.py "$@"

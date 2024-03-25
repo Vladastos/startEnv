@@ -79,7 +79,7 @@ if not os.system(f'tmux has-session -t {environment["environmentName"]} 2>/dev/n
     # Send commands
     sendCommands(environment['panes'])
     #Set title pane
-    if 'titleScreen' in environment['options']:
-        setTitleScreen(environment['options']['titleScreen'])
+    if 'titleScreen' in environment['pane_options']:
+        setTitleScreen(environment['pane_options']['titleScreen'])
 log(f"Attaching to session '{environment['environmentName']}'")
 os.system(f'tmux attach -t {environment["environmentName"]}')

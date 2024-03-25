@@ -31,6 +31,11 @@ function download_script(){
   log "INFO" "Downloading startEnv..."
   wget -q "$REMOTE_SCRIPTS_DIR/python/startEnv.py"
   wget -q "$REMOTE_SCRIPTS_DIR/python/requirements.txt"
+  python3 -m venv venv > /dev/null
+  # shellcheck disable=SC1091
+  . venv/bin/activate
+  log "INFO" "Installing requirements..."
+  pip install -r requirements.txt > /dev/null
 }
 
 
