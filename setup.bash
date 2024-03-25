@@ -2,7 +2,7 @@
 
 DEPENDENCIES=("python3" "pip" "git" "wget" "tmux" "figlet")
 
-HOME_CONFIG_DIR="/home/$(logname)/.config"
+HOME_CONFIG_DIR="/home/$(logname)/.config/startEnv"
 REMOTE_DIR="https://raw.githubusercontent.com/Vladastos/startEnv/main"
 SCRIPTS_DIR="${HOME_CONFIG_DIR}/scripts"
 REMOTE_SCRIPTS_DIR="${REMOTE_DIR}/scripts"
@@ -12,7 +12,7 @@ TMUX_CONFIG_DIR="${HOME_CONFIG_DIR}/tmux"
 REMOTE_TMUX_CONFIG_DIR="${REMOTE_DIR}/tmux"
 ALIAS="
 startEnv(){
-  python3 ${SCRIPTS_DIR}/startEnv.py \"\$1\"
+  bash ${SCRIPTS_DIR}/start.bash \"\$1\"
 }"
 function log() {
   local log_level=$1
@@ -27,7 +27,11 @@ function download_script(){
   cd "$SCRIPTS_DIR" || exit
   log "INFO" "Downloading startEnv..."
   wget -q "$REMOTE_SCRIPTS_DIR/startEnv.py"
+  python -m venv venv
+  wget -q "$REMOTE_SCRIPTS_DIR/requirements.txt"
+  pip install -r requirements.txt
 }
+
 
 function prompt_user_and_execute() {
   local question=$1
