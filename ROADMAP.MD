@@ -12,10 +12,10 @@ Possibly also add an option to download the config file to the user's tmux confi
 Add commands to create and activate a virtual environment for startEnv on installation.
 
 
-### Use argparse instead of manual parsing 
+## Use argparse instead of manual parsing  (0.0.4)
 
 
-### Move all directory paths to scripts/.env
+## Move all directory paths to scripts/.env
 
 
 

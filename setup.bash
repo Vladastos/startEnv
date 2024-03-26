@@ -10,10 +10,9 @@ CONFIG_DIR="${HOME_CONFIG_DIR}/config"
 REMOTE_CONFIG_DIR="$REMOTE_DIR/config"
 TMUX_CONFIG_DIR="${HOME_CONFIG_DIR}/tmux"
 REMOTE_TMUX_CONFIG_DIR="${REMOTE_DIR}/tmux"
-ALIAS="
-startEnv(){
-  bash ${SCRIPTS_DIR}/start.bash \"\$1\"
-}"
+# shellcheck disable=SC2124
+# shellcheck disable=SC2027
+ALIAS="startEnv(){ bash /home/vlad/.config/startEnv/scripts/start.bash \$@ ;}"
 function log() {
   local log_level=$1
   shift
@@ -31,10 +30,11 @@ function download_script(){
   log "INFO" "Downloading startEnv..."
   wget -q "$REMOTE_SCRIPTS_DIR/python/startEnv.py"
   wget -q "$REMOTE_SCRIPTS_DIR/python/requirements.txt"
+  log "INFO" "Creating virtual environment..."
   python3 -m venv venv > /dev/null
   # shellcheck disable=SC1091
   . venv/bin/activate
-  log "INFO" "Installing requirements..."
+  log "INFO" "Installing python requirements..."
   pip install -r requirements.txt > /dev/null
 }
 
@@ -97,10 +97,10 @@ if [ ! -f "${CONFIG_DIR}/config.json" ]; then
 fi
 
 if ! grep -q "startEnv()" "$HOME/.bash_aliases"; then
-  echo "$ALIAS" >> "$HOME"/.bash_aliases
+  echo "startEnv(){ bash /home/vlad/.config/startEnv/scripts/start.bash \$@ ;}" >> "$HOME"/.bash_aliases
 fi
 
-prompt_user_and_execute "Do you want startEnv to create it's own tmux config? (it will be placed in a separate folder and will not interfere with your config)" create_tmux_config
+prompt_user_and_execute "Do you want startEnv to create it's own tmux config?" create_tmux_config
 
 
 log "INFO" "startEnv installed successfully!"

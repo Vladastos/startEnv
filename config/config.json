@@ -11,7 +11,7 @@
           "style": ""
         }
       ],
-      "pane_options": { "titleScreen": {
+      "options": { "titleScreen": {
         "title":"",
         "style":""
       } }
