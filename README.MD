@@ -19,7 +19,7 @@ To list all available environments, run the following command:
 
 Run `startEnv --help` or `startEnv -h` for more information.
 
-Run `startEnv --kill` or `startEnv -k` to install startEnv.
+Run `startEnv --kill` or `startEnv -k` to kill a session started by strtEnv.
 
 Run `startEnv --uninstall` or `startEnv -u` to uninstall startEnv.
 
