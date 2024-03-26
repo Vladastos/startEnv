@@ -52,10 +52,10 @@ the `config/config.json` file is structured as follows:
                     "cmd": [ //List of commands to run in the pane
                         ""
                     ],
-                    "style": "" //Style of the pane (not yet implemented)
+                    "pane_style": "" //Style of the pane (not yet implemented)
                 }
             ],
-            "options": {  //Options for the pane
+            "environment_options": {  //Options for the pane
                 "titleScreen": { //Title pane, if not set, it will not be created
                     "title":"",
                     "style":""
@@ -64,6 +64,7 @@ the `config/config.json` file is structured as follows:
         }
     ],
     "options":{
-        "disable_custom_tmux_config": false //Set to true if you want startEnv to use your tmux config
+        "disable_custom_tmux_config": false //Set to true if you want startEnv to use your tmux config (not yet implemented)
+    }
 }
 ```

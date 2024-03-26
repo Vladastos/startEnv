@@ -11,10 +11,12 @@
           "style": ""
         }
       ],
-      "options": { "titleScreen": {
-        "title":"",
-        "style":""
-      } }
+      "environment_options": {
+        "titleScreen": {
+          "title":"",
+          "style":""
+        } 
+      }
     }
   ],
   "options":{

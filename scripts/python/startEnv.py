@@ -67,7 +67,7 @@ class MainAction(argparse.Action):
     def tmuxSendCommands(windows):
         for windowNumber, window in enumerate(windows):
             pane_name=window['name']
-            pane_style=window['style']
+            pane_style=window['pane_style']
             os.system(f'tmux -L startEnv select-pane -T "{pane_name}" -t {windowNumber} ')
             for commandNumber, command in enumerate(window['cmd']):
                 if command == '':
@@ -88,15 +88,15 @@ class MainAction(argparse.Action):
 
         # Check if tmux has session named environmentName
         if not os.system(f'tmux -L startEnv has-session -t {environment["environmentName"]} 2>/dev/null') == 0:
-            log(f"Session '{environment['environmentName']}' does not exist, creating it")
+            log(f"Creating session '{environment['environmentName']}'")
             # Create a new tmux session
             os.system(f'tmux -f ~/.config/startEnv/tmux/tmux.conf -L startEnv new-session -d -s {environment["environmentName"]}')
             MainAction.tmuxSplitPanes(len(environment['panes']))
             # Send commands
             MainAction.tmuxSendCommands(environment['panes'])
             #Set title pane
-            if 'titleScreen' in environment['options']:
-                MainAction.tmuxSetTitleScreen(environment['options']['titleScreen'], environment['environmentName'])
+            if 'titleScreen' in environment['environment_options']:
+                MainAction.tmuxSetTitleScreen(environment['environment_options']['titleScreen'], environment['environmentName'])
         log(f"Attaching to session '{environment['environmentName']}'")
         os.system(f'tmux -L startEnv attach -t {environment["environmentName"]}')
 
