@@ -145,7 +145,9 @@ function download_config(){
 function download_fonts(){
   log "INFO" "Downloading fonts..."
   mkdir -p "$FONTS_DIR"
+  cd "$FONTS_DIR" || exit
   for font in "${FONTS[@]}"; do
+    echo "Downloading $font..."
     download_single_file "$REMOTE_FONTS_DIR/$font"
   done
 }
@@ -188,7 +190,7 @@ function welcome_screen(){
   }
   write_separator
   center_lines "Welcome to"
-  figlet -t -c startEnv
+  figlet -f "$FONTS_DIR/${FONTS["3d"]}" -t -c startEnv
   center_lines "Version $VERSION "
   write_separator
 }
@@ -196,8 +198,6 @@ function welcome_screen(){
 function main(){
   source_consts_from_remote
   # shellcheck disable=SC1091
-  source scripts/consts.bash
-  download_fonts
   echo 
   log "INFO" "Installing startEnv version $VERSION..."
   prompt_user_and_execute "Do you want to install dependencies?" install_dependencies
