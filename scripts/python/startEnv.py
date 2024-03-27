@@ -102,7 +102,7 @@ class MainAction(argparse.Action):
 
 parser = argparse.ArgumentParser( prog = 'startEnv', description='Start environments with tmux', epilog='For more information, visit https://github.com/Vladastos/startEnv')
 parser.add_argument('environment', action=MainAction, type=str, help='Name of the environment')
-parser.add_argument('-v', '--version', action='version', version='%(prog)s 0.1.0')
+parser.add_argument('-v', '--version', action='version', version='%(prog)s' + ' ' +os.environ['VERSION'])
 parser.add_argument('--uninstall', action='store_true', help='Uninstall startEnv')
 parser.add_argument('-k', '--kill', action=KillAction, nargs=1, metavar='session', help='Kill a session started by startEnv')
 parser.add_argument('-l', '--list', action=ListAction, nargs=0, default=False, help='List environments')

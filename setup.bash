@@ -24,6 +24,7 @@ function download_script(){
   mkdir -p "$SCRIPTS_DIR"
   cd  "$SCRIPTS_DIR" || exit
   wget -q "$REMOTE_SCRIPTS_DIR/start.bash"
+  wget -q "$REMOTE_SCRIPTS_DIR/consts.bash"
   mkdir -p "$SCRIPTS_DIR/python"
   cd "$SCRIPTS_DIR/python" || exit
   log "INFO" "Downloading startEnv..."
@@ -99,8 +100,11 @@ if ! grep -q "startEnv()" "$HOME/.bash_aliases"; then
   echo "startEnv(){ bash /home/vlad/.config/startEnv/scripts/start.bash \$@ ;}" >> "$HOME"/.bash_aliases
 fi
 
+
 prompt_user_and_execute "Do you want startEnv to create it's own tmux config?" create_tmux_config
 
-figlet -t -c "Culo"
+figlet "startEnv"
+# shellcheck disable=SC1091
+. "${SCRIPTS_DIR}"/consts.bash
 
-log "INFO" "startEnv installed successfully!"
+log "INFO" "startEnv version $VERSION installed successfully!"
