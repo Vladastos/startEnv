@@ -104,6 +104,7 @@ parser = argparse.ArgumentParser( prog = 'startEnv', description='Start environm
 parser.add_argument('environment', action=MainAction, type=str, help='Name of the environment')
 parser.add_argument('-v', '--version', action='version', version='%(prog)s' + ' ' +os.environ['VERSION'])
 parser.add_argument('--uninstall', action='store_true', help='Uninstall startEnv')
+parser.add_argument('--update', action='store_true', help='Update startEnv')
 parser.add_argument('-k', '--kill', action=KillAction, nargs=1, metavar='session', help='Kill a session started by startEnv')
 parser.add_argument('-l', '--list', action=ListAction, nargs=0, default=False, help='List environments')
 args = parser.parse_args()

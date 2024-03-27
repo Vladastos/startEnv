@@ -1,6 +1,6 @@
 #!/bin/bash
 # shellcheck source=/dev/null
-. /home/vlad/startEnv/scripts/consts.bash
+source "${HOME}"/.config/startEnv/consts.bash
 
 function log(){
     local log_level=$1
@@ -42,24 +42,50 @@ function check_dependencies() {
         fi
     done
 }
-if [ "$1" == "--uninstall" ]; then
+function uninstall(){
     prompt_user_and_execute "Do you want to delete the scripts?" "rm -rf $SCRIPTS_DIR" 
     prompt_user_and_execute "Do you want to delete your config files?" "rm -rf $HOME/.config/startEnv"
     prompt_user_and_execute "Do you want to delete the alias from .bash_aliases?" "sed -i '/^startEnv()/d' $HOME/.bash_aliases"
     source "$HOME"/.bashrc
     exit 0
-fi
+}
 
-# create and activate the venv
-if [ ! -d "${SCRIPTS_DIR}"/python/venv ]; then
-    python3 -m venv "$SCRIPTS_DIR/python/venv"
-    . "${SCRIPTS_DIR}"/python/venv/bin/activate
-    pip install -r "${SCRIPTS_DIR}/python/requirements.txt"
-else
-    . "${SCRIPTS_DIR}"/python/venv/bin/activate
-fi
+function update(){
+    function get_remote_version(){
+        local remote_version
+        remote_version=$(wget -qO- "$REMOTE_DIR"/consts.bash | grep -m1 "VERSION=" | cut -d "=" -f2)
+    }
 
-check_dependencies
+    local installed_version="$VERSION"
+    local remote_version
+    remote_version=$(get_remote_version)
+    if [ "$installed_version" != "$remote_version" ]; then
+        prompt_user_and_execute "Do you want to update the scripts?" "rm -rf $SCRIPTS_DIR && wget -qO- $REMOTE_DIR | bash"
+    fi
 
-# start the script
-python3 "${SCRIPTS_DIR}"/python/startEnv.py "$@"
+}
+function main(){
+    if [ "$1" == "--uninstall" ]; then
+        uninstall
+    fi
+    if [ "$1" == "--update" ]; then    
+        update
+    fi
+
+    check_dependencies
+
+    # create and activate the venv
+    if [ ! -d "${SCRIPTS_DIR}"/python/venv ]; then
+        python3 -m venv "$SCRIPTS_DIR/python/venv"
+        . "${SCRIPTS_DIR}"/python/venv/bin/activate
+        pip install -r "${SCRIPTS_DIR}/python/requirements.txt"
+    else
+        . "${SCRIPTS_DIR}"/python/venv/bin/activate
+    fi
+
+    # start the script
+    python3 "${SCRIPTS_DIR}"/python/startEnv.py "$@"
+
+}
+
+main "$@"

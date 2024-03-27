@@ -20,25 +20,6 @@ function log() {
   echo "$timestamp [$log_level] $message"
 }
 
-function download_script(){
-  mkdir -p "$SCRIPTS_DIR"
-  cd  "$SCRIPTS_DIR" || exit
-  wget -q "$REMOTE_SCRIPTS_DIR/start.bash"
-  wget -q "$REMOTE_SCRIPTS_DIR/consts.bash"
-  mkdir -p "$SCRIPTS_DIR/python"
-  cd "$SCRIPTS_DIR/python" || exit
-  log "INFO" "Downloading startEnv..."
-  wget -q "$REMOTE_SCRIPTS_DIR/python/startEnv.py"
-  wget -q "$REMOTE_SCRIPTS_DIR/python/requirements.txt"
-  log "INFO" "Creating virtual environment..."
-  python3 -m venv venv > /dev/null
-  # shellcheck disable=SC1091
-  . venv/bin/activate
-  log "INFO" "Installing python requirements..."
-  pip install -r requirements.txt > /dev/null
-}
-
-
 function prompt_user_and_execute() {
   local question=$1
   local command=$2
@@ -48,25 +29,85 @@ function prompt_user_and_execute() {
       eval "$command"
       ;;
     *)
-      exit 0
+      exit 1
       ;;
   esac
 }
 
-function install(){
-  local package=$1
-  if ! (command -v "$package" &> /dev/null) then
-    log "INFO" "Installing $1..."
-    sudo apt-get --yes install "$1" > /dev/null
-  else :
-    log "INFO" "$1 already installed"
-  fi
+function download_single_file(){
+    log "INFO" "Downloading $1..."
+    local file=$1
+    local max_attempts=3
+    local current_attempt=0
+    until wget -q "$file" || [ $current_attempt -eq $max_attempts ]; do
+        ((current_attempt++))
+        log "WARN" "Failed to download file. Retrying ($current_attempt/$max_attempts)"
+        sleep 1
+    done
+    if [ $current_attempt -eq $max_attempts ]; then
+        log "ERROR" "Failed to download file after $max_attempts attempts"
+    fi
+}
+
+function download_scripts(){
+  function download_bash_scripts(){
+    local scripts=("$@")
+    mkdir -p "$SCRIPTS_DIR"
+    cd  "$SCRIPTS_DIR" || exit
+    log "INFO" "Downloading bash scripts..."
+    for script in "${scripts[@]}"; do
+      download_single_file "$script"
+    done
+  }
+
+  function download_python_scripts(){
+    local scripts=("$@")
+    mkdir -p "$SCRIPTS_DIR/python"
+    cd "$SCRIPTS_DIR/python" || exit
+    log "INFO" "Downloading python scripts..."
+  
+    for script in "${scripts[@]}"; do
+      download_single_file "$script"
+    done
+  }
+
+  function create_virtual_environment(){
+    cd "$SCRIPTS_DIR"/python || exit
+    log "INFO" "Creating virtual environment..."
+    python3 -m venv venv > /dev/null
+    # shellcheck disable=SC1091
+    . venv/bin/activate
+    log "INFO" "Installing python requirements..."
+    pip install -r requirements.txt > /dev/null
+  }
+
+  local bash_scripts=(
+    "$REMOTE_SCRIPTS_DIR/start.bash"
+    "$REMOTE_SCRIPTS_DIR/consts.bash"
+  )
+  local python_scripts=(
+    "$REMOTE_SCRIPTS_DIR/python/startEnv.py"
+    "$REMOTE_SCRIPTS_DIR/python/requirements.txt"
+  )
+  
+  download_bash_scripts "${bash_scripts[@]}"
+
+  download_python_scripts "${python_scripts[@]}"
+
+  create_virtual_environment
+
+  
 }
 
 function install_dependencies(){
   log "INFO" "Installing dependencies..."
   for dep in "${DEPENDENCIES[@]}"; do
-    install "$dep"
+    if ! (command -v "$dep" &> /dev/null) then
+    log "INFO" "Installing $dep..."
+    sudo apt-get --yes install "$dep" > /dev/null
+  else :
+    log "INFO" "$dep already installed"
+  fi
   done
 }
 
@@ -75,36 +116,64 @@ function create_tmux_config(){
   log "INFO" "Creating tmux config..."
   mkdir -p "$TMUX_CONFIG_DIR"
   cd "$TMUX_CONFIG_DIR" || exit
-  wget -q "$REMOTE_TMUX_CONFIG_DIR/tmux.conf"
+  download_single_file "$REMOTE_TMUX_CONFIG_DIR/tmux.conf"
   #install tpm
   if [ ! -d ~/.tmux/plugins/tpm ]; then
+    log "INFO" "Installing tpm..."
     git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
   fi
 }
 
-prompt_user_and_execute "Do you want to install dependencies?" install_dependencies
-log "INFO" "Starting setup..."
+function create_alias(){
+  if ! grep -q "startEnv()" "$HOME/.bash_aliases"; then
+    log "INFO" "Creating alias..."
+    echo "startEnv(){ bash /home/vlad/.config/startEnv/scripts/start.bash \$@ ;}" >> "$HOME"/.bash_aliases
+  else :
+    log "INFO" "Alias already exists"
+  fi
 
+}
 
-if [ ! -f "${SCRIPTS_DIR}/startEnv.py" ]; then
-  prompt_user_and_execute "Do you want to download startEnv.py?" download_script
-fi
+function download_config(){
+  log "INFO" "Downloading config..."
+  if [ ! -f "${CONFIG_DIR}/config.json" ]; then
+    mkdir -p "$CONFIG_DIR"
+    cd "$CONFIG_DIR" || exit
+    download_single_file "$REMOTE_CONFIG_DIR/config.json"
+  fi
+}
 
-if [ ! -f "${CONFIG_DIR}/config.json" ]; then
-  mkdir -p "$CONFIG_DIR"
-  cd "$CONFIG_DIR" || exit
-  wget -q "$REMOTE_CONFIG_DIR/config.json"
-fi
+function get_current_version() {
+  local current_version
+  current_version=$(grep -m1 "VERSION=" "wget -qO- $REMOTE_DIR/consts.bash" | cut -d "=" -f2)
+  export current_version
+}
 
-if ! grep -q "startEnv()" "$HOME/.bash_aliases"; then
-  echo "startEnv(){ bash /home/vlad/.config/startEnv/scripts/start.bash \$@ ;}" >> "$HOME"/.bash_aliases
-fi
+function cleanup_on_error() {
+  local exit_code=$?
+  if [ "$exit_code" -ne 0 ]; then
+    log "ERROR" "Something went wrong, cleaning up..."
+    rm -rf "$HOME_CONFIG_DIR"
+    sed -i "/startEnv()/d" "$HOME/.bash_aliases"
+    log "ERROR" "Clean up completed"
+  fi
+}
 
+function main(){
+  get_current_version
+  log "INFO" "Installing startEnv version $current_version..."
+  prompt_user_and_execute "Do you want to install dependencies?" install_dependencies
+  prompt_user_and_execute "Do you want to download all the necessary scripts?" download_scripts
+  prompt_user_and_execute "Do you want startEnv to create it's own tmux config?" create_tmux_config
+  create_alias
+  download_config
+  figlet "startEnv"
+  # shellcheck disable=SC1091
+  . "${SCRIPTS_DIR}"/consts.bash
+  log "INFO" "startEnv version $VERSION installed successfully!" 
+}
 
-prompt_user_and_execute "Do you want startEnv to create it's own tmux config?" create_tmux_config
+trap cleanup_on_error EXIT
 
-figlet "startEnv"
-# shellcheck disable=SC1091
-. "${SCRIPTS_DIR}"/consts.bash
+main
 
-log "INFO" "startEnv version $VERSION installed successfully!"
