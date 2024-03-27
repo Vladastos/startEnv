@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
+#PYTHON_ARGCOMPLETE_OK
 import json
 import os
 import sys
 import argparse
+import argcomplete
 
 def log(message, level='info'):
     valid_levels = ['debug', 'info', 'warning', 'error', 'critical']
@@ -98,13 +100,20 @@ class MainAction(argparse.Action):
                 MainAction.tmuxSetTitleScreen(environment['environment_options']['titleScreen'], environment['environmentName'])
         log(f"Attaching to session '{environment['environmentName']}'")
         os.system(f'tmux -L startEnv attach -t {environment["environmentName"]}')
+        
+class EnvironmentCompleter(object):
+    def __init__(self, choices):
+        self.choices = choices
+    def __call__(self, **kwargs):
+        return self.choices
 
 parser = argparse.ArgumentParser( prog = 'startEnv', description='Start environments with tmux', epilog='For more information, visit https://github.com/Vladastos/startEnv')
-parser.add_argument('environment', action=MainAction, type=str, help='Name of the environment')
+parser.add_argument('environment', action=MainAction, type=str, help='Name of the environment').completer=EnvironmentCompleter(getEnvironmentList(config_data))
 parser.add_argument('-v', '--version', action='version', version='%(prog)s' + ' ' +os.environ['VERSION'])
 parser.add_argument('--uninstall', action='store_true', help='Uninstall startEnv')
 parser.add_argument('--update', action='store_true', help='Update startEnv')
-parser.add_argument('-k', '--kill', action=KillAction, nargs=1, metavar='session', help='Kill a session started by startEnv')
+parser.add_argument('-k', '--kill', action=KillAction, nargs=1, metavar='session', help='Kill a session started by startEnv', choices=getEnvironmentList(config_data))
 parser.add_argument('-l', '--list', action=ListAction, nargs=0, default=False, help='List environments')
+argcomplete.autocomplete(parser)
 args = parser.parse_args()
 

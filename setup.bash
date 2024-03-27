@@ -81,6 +81,8 @@ function download_scripts(){
     . venv/bin/activate
     log "INFO" "Installing python requirements..."
     pip install -r requirements.txt > /dev/null
+    log "INFO" "Virtual environment created"
+    deactivate
   }
 
   local bash_scripts=(
@@ -197,10 +199,29 @@ function welcome_screen(){
   write_separator
 }
 
+
+function enable_auto_completion(){
+  if [ -f "$HOME"/.bash_completion ]; then
+    log "INFO" "Enabling auto-completion..."
+    pip install argcomplete
+    activate-global-python-argcomplete
+    # shellcheck disable=SC2129
+    echo "" >> "$HOME"/.bashrc
+    echo "####startEnv Auto-completion" >> "$HOME"/.bashrc
+    # shellcheck disable=SC2016
+    echo 'eval "$(register-python-argcomplete startEnv)" ' >> "$HOME"/.bashrc
+    # shellcheck disable=SC1091
+    source "$HOME"/.bash_completion
+  else :
+    log "INFO" "Auto-completion already enabled"
+  fi
+}
+
 function main(){
   # shellcheck disable=SC1091
   log "INFO" "Installing startEnv version $VERSION..."
   prompt_user_and_execute "Do you want to install dependencies?" install_dependencies
+  prompt_user_and_execute "Do you want to enable auto-completion for startEnv?" enable_auto_completion
   prompt_user_and_execute "Do you want to download all the necessary scripts?" download_scripts
   prompt_user_and_execute "Do you want startEnv to create it's own tmux config?" create_tmux_config
   create_alias

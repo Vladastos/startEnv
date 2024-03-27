@@ -1,4 +1,4 @@
-export VERSION="0.1.13"
+export VERSION="0.2.0"
 export DEPENDENCIES=(tmux python3 pip git wget figlet)
 
 export STARTENV_DIR="$HOME/.config/startEnv"

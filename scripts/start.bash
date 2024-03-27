@@ -45,6 +45,7 @@ function uninstall(){
     prompt_user_and_execute "Do you want to delete the scripts?" "rm -rf $SCRIPTS_DIR" 
     prompt_user_and_execute "Do you want to delete your config files?" "rm -rf $HOME/.config/startEnv"
     prompt_user_and_execute "Do you want to delete the alias from .bash_aliases?" "sed -i '/^startEnv()/d' $HOME/.bash_aliases"
+    eval "sed -i '/^eval \"\$(register-python-argcomplete startEnv)\"/d' $HOME/.bashrc"
     source "$HOME"/.bashrc
 }
 
