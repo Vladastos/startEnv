@@ -1,8 +1,4 @@
 #!/bin/bash
-REMOTE_DIR="https://raw.githubusercontent.com/Vladastos/startEnv/main"
-REMOTE_SCRIPTS_DIR="${REMOTE_DIR}/scripts"
-REMOTE_CONFIG_DIR="$REMOTE_DIR/config"
-REMOTE_TMUX_CONFIG_DIR="${REMOTE_DIR}/tmux"
 # shellcheck disable=SC2124
 # shellcheck disable=SC2027
 function log() {
@@ -137,7 +133,7 @@ function download_config(){
 }
 
 function get_latest_version() {
-  remote_consts=$(wget -qO- "$REMOTE_DIR"/scripts/consts.bash)
+  remote_consts=$(wget -qO- "https://raw.githubusercontent.com/Vladastos/startEnv/main/scripts/consts.bash")
   # shellcheck disable=SC1090
   source <(echo "$remote_consts")
 }
@@ -155,6 +151,7 @@ function cleanup_on_error() {
 
 function main(){
   get_latest_version
+  echo 
   log "INFO" "Installing startEnv version $VERSION..."
   prompt_user_and_execute "Do you want to install dependencies?" install_dependencies
   prompt_user_and_execute "Do you want to download all the necessary scripts?" download_scripts

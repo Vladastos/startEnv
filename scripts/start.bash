@@ -1,7 +1,6 @@
 #!/bin/bash
 # shellcheck source=/dev/null
-#source "${HOME}"/.config/startEnv/scripts/consts.bash
-source scripts/consts.bash
+source "${HOME}"/.config/startEnv/scripts/consts.bash
 function log(){
     local log_level=$1
     shift
@@ -47,6 +46,21 @@ function uninstall(){
     prompt_user_and_execute "Do you want to delete your config files?" "rm -rf $HOME/.config/startEnv"
     prompt_user_and_execute "Do you want to delete the alias from .bash_aliases?" "sed -i '/^startEnv()/d' $HOME/.bash_aliases"
     source "$HOME"/.bashrc
+    exit 0
+}
+
+function update(){
+    log "INFO" "Checking for updates..."
+    local latest_version
+    latest_version=$(curl -s "$REMOTE_DIR"/scripts/consts.bash | grep -oP '(?<=VERSION=")[^"]+') || log "ERROR" "Failed to get latest version"
+    
+    if [ "$VERSION" == "$latest_version" ]; then
+        log "INFO" "You are already using the latest version ($VERSION)"
+        exit 0
+    fi
+    log "INFO" "Updating to version $latest_version..."
+    prompt_user_and_execute "Do you want to uninstall the old version?" "uninstall"
+    prompt_user_and_execute "Do you want to download all the necessary scripts?" "bash <(wget -qO- https://raw.githubusercontent.com/Vladastos/startEnv/main/setup.bash) && source ~/.bashrc"
     exit 0
 }
 

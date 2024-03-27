@@ -1,4 +1,4 @@
-export VERSION="0.1.7"
+export VERSION="0.1.8"
 export DEPENDENCIES=(tmux python3 pip git wget figlet)
 
 export STARTENV_DIR="$HOME/.config/startEnv"
@@ -11,5 +11,10 @@ export VENV_DIR="$SCRIPTS_DIR/python/venv"
 export REQUIREMENTS_TXT="$SCRIPTS_DIR/python/requirements.txt"
 export TMUX_CONFIG_DIR="${STARTENV_DIR}/tmux"
 export TMUX_CONF="$STARTENV_DIR/tmux/tmux.conf"
+
+export REMOTE_DIR="https://raw.githubusercontent.com/Vladastos/startEnv/main"
+export REMOTE_SCRIPTS_DIR="${REMOTE_DIR}/scripts"
+export REMOTE_CONFIG_DIR="$REMOTE_DIR/config"
+export REMOTE_TMUX_CONFIG_DIR="${REMOTE_DIR}/tmux"
 
 export FILES=("$CONFIG_FILE" "$START_ENV_PY" "$REQUIREMENTS_TXT" "$TMUX_CONF")
