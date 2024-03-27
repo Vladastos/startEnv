@@ -1,7 +1,7 @@
 #!/bin/bash
 # shellcheck source=/dev/null
-source "${HOME}"/.config/startEnv/consts.bash
-
+#source "${HOME}"/.config/startEnv/scripts/consts.bash
+source scripts/consts.bash
 function log(){
     local log_level=$1
     shift
@@ -50,20 +50,6 @@ function uninstall(){
     exit 0
 }
 
-function update(){
-    function get_remote_version(){
-        local remote_version
-        remote_version=$(wget -qO- "$REMOTE_DIR"/consts.bash | grep -m1 "VERSION=" | cut -d "=" -f2)
-    }
-
-    local installed_version="$VERSION"
-    local remote_version
-    remote_version=$(get_remote_version)
-    if [ "$installed_version" != "$remote_version" ]; then
-        prompt_user_and_execute "Do you want to update the scripts?" "rm -rf $SCRIPTS_DIR && wget -qO- $REMOTE_DIR | bash"
-    fi
-
-}
 function main(){
     if [ "$1" == "--uninstall" ]; then
         uninstall
