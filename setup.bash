@@ -28,17 +28,22 @@ function prompt_user_and_execute() {
 function download_single_file(){
     local file=$1
     local file_name
+    if [ -f "$file" ]; then
+      log "INFO" "File $file already exists"
+      return
+    fi
     file_name=$(basename "$file")
     log "INFO" "Downloading $file_name..."
     local max_attempts=3
     local current_attempt=0
     until wget -q "$file" || [ $current_attempt -eq $max_attempts ]; do
-        ((current_attempt++))
-        log "WARN" "Failed to download file. Retrying ($current_attempt/$max_attempts)"
-        sleep 1
+      ((current_attempt++))
+      log "WARN" "Failed to download file. Retrying ($current_attempt/$max_attempts)"
+      sleep 1
     done
     if [ $current_attempt -eq $max_attempts ]; then
         log "ERROR" "Failed to download file after $max_attempts attempts"
+        exit 1
     fi
 }
 
@@ -96,16 +101,17 @@ function install_dependencies(){
   log "INFO" "Installing dependencies..."
   for dep in "${DEPENDENCIES[@]}"; do
     if ! (command -v "$dep" &> /dev/null) then
-    log "INFO" "Installing $dep..."
-    sudo apt-get --yes install "$dep" > /dev/null
-  else :
-    log "INFO" "$dep already installed"
-  fi
+      log "INFO" "Installing $dep..."
+      sudo apt-get --yes install "$dep" > /dev/null
+    else :
+      log "INFO" "$dep already installed"
+    fi
   done
 }
 
 #TODO: add tmux config 
 function create_tmux_config(){
+
   log "INFO" "Creating tmux config..."
   mkdir -p "$TMUX_CONFIG_DIR"
   cd "$TMUX_CONFIG_DIR" || exit
@@ -136,7 +142,15 @@ function download_config(){
   fi
 }
 
-function get_latest_version() {
+function download_fonts(){
+  log "INFO" "Downloading fonts..."
+  mkdir -p "$FONTS_DIR"
+  for font in "${FONTS[@]}"; do
+    download_single_file "$REMOTE_FONTS_DIR/$font"
+  done
+}
+
+function source_consts_from_remote() {
   remote_consts=$(wget -qO- "https://raw.githubusercontent.com/Vladastos/startEnv/main/scripts/consts.bash")
   # shellcheck disable=SC1090
   source <(echo "$remote_consts")
@@ -180,7 +194,10 @@ function welcome_screen(){
 }
 
 function main(){
-  get_latest_version
+  source_consts_from_remote
+  # shellcheck disable=SC1091
+  source scripts/consts.bash
+  download_fonts
   echo 
   log "INFO" "Installing startEnv version $VERSION..."
   prompt_user_and_execute "Do you want to install dependencies?" install_dependencies
@@ -188,6 +205,7 @@ function main(){
   prompt_user_and_execute "Do you want startEnv to create it's own tmux config?" create_tmux_config
   create_alias
   download_config
+  prompt_user_and_execute "Do you want to download custom figlet fonts to $FONTS_DIR?" download_fonts
   welcome_screen
 }
 
