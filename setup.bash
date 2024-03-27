@@ -153,6 +153,32 @@ function cleanup_on_error() {
   fi
 }
 
+function welcome_screen(){
+  function write_separator() {
+    echo " "
+    printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' '='
+    echo " "
+
+  }
+  function center_lines() {
+    local lines_to_print=("$@")
+    for line in "${lines_to_print[@]}"; do
+      local line_length=${#line}
+      local padding=$(((( COLUMNS - line_length) / 2 )-1))
+      printf "%*s" "$padding" ""
+      printf "%s" "$line"
+      printf "%*s" "$padding" ""
+      printf "\n"
+    done
+
+  }
+  write_separator
+  center_lines "Welcome to"
+  figlet -t -c startEnv
+  center_lines "Version $VERSION "
+  write_separator
+}
+
 function main(){
   get_latest_version
   echo 
@@ -162,8 +188,7 @@ function main(){
   prompt_user_and_execute "Do you want startEnv to create it's own tmux config?" create_tmux_config
   create_alias
   download_config
-  figlet "startEnv"
-  log "INFO" "startEnv version $VERSION installed successfully!" 
+  welcome_screen
 }
 
 trap cleanup_on_error EXIT
