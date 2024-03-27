@@ -43,7 +43,6 @@ class ListAction(argparse.Action):
         if len(environments) == 0:
             log('No environments found in config file')
             sys.exit(0)
-        log(f'Environments found: {len(environments)}')
         for environment in environments:
             print(environment)
         sys.exit(0)

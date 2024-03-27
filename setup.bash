@@ -1,6 +1,10 @@
 #!/bin/bash
 # shellcheck disable=SC2124
 # shellcheck disable=SC2027
+remote_consts=$(wget -qO- "https://raw.githubusercontent.com/Vladastos/startEnv/main/scripts/consts.bash")
+# shellcheck disable=SC1090
+source <(echo "$remote_consts")
+
 function log() {
   local log_level=$1
   shift
@@ -151,14 +155,6 @@ function download_fonts(){
     download_single_file "$REMOTE_FONTS_DIR/$font"
   done
 }
-
-function source_consts_from_remote() {
-  remote_consts=$(wget -qO- "https://raw.githubusercontent.com/Vladastos/startEnv/main/scripts/consts.bash")
-  # shellcheck disable=SC1090
-  source <(echo "$remote_consts")
-}
-
-
 function cleanup_on_error() {
   local exit_code=$?
   if [ "$exit_code" -ne 0 ]; then
@@ -188,9 +184,12 @@ function welcome_screen(){
     done
 
   }
+  
   write_separator
   center_lines "Welcome to "
-  figlet -f "$FONTS_DIR/${FONTS[3d]}" -t -c startEnv
+  echo " "
+  figlet -f "$FONTS_DIR"/3d.flf -t -c "startEnv"
+  echo " "
   center_lines "Version $VERSION "
   echo " "
   echo " "
@@ -199,9 +198,7 @@ function welcome_screen(){
 }
 
 function main(){
-  source_consts_from_remote
   # shellcheck disable=SC1091
-  echo 
   log "INFO" "Installing startEnv version $VERSION..."
   prompt_user_and_execute "Do you want to install dependencies?" install_dependencies
   prompt_user_and_execute "Do you want to download all the necessary scripts?" download_scripts

@@ -13,9 +13,10 @@ export TMUX_CONFIG_DIR="${STARTENV_DIR}/tmux"
 export TMUX_CONF="$STARTENV_DIR/tmux/tmux.conf"
 
 export FONTS_DIR="$STARTENV_DIR/figlet-fonts"
-declare -A FONTS
-FONTS["3d"]="3d.flf"
-FONTS["ansi_shadow"]="ANSI_Shadow.flf"
+declare -A FONTS=(
+    [3d]="3d.flf"
+    [ansi_shadow]="ANSI_Shadow.flf"
+)
 export FONTS
 
 export REMOTE_DIR="https://raw.githubusercontent.com/Vladastos/startEnv/main"
