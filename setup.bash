@@ -1,14 +1,7 @@
 #!/bin/bash
-
-DEPENDENCIES=("python3" "pip" "git" "wget" "tmux" "figlet")
-
-HOME_CONFIG_DIR="/home/$(logname)/.config/startEnv"
 REMOTE_DIR="https://raw.githubusercontent.com/Vladastos/startEnv/main"
-SCRIPTS_DIR="${HOME_CONFIG_DIR}/scripts"
 REMOTE_SCRIPTS_DIR="${REMOTE_DIR}/scripts"
-CONFIG_DIR="${HOME_CONFIG_DIR}/config"
 REMOTE_CONFIG_DIR="$REMOTE_DIR/config"
-TMUX_CONFIG_DIR="${HOME_CONFIG_DIR}/tmux"
 REMOTE_TMUX_CONFIG_DIR="${REMOTE_DIR}/tmux"
 # shellcheck disable=SC2124
 # shellcheck disable=SC2027
@@ -143,33 +136,32 @@ function download_config(){
   fi
 }
 
-function get_current_version() {
-  local current_version
-  current_version=$(grep -m1 "VERSION=" "wget -qO- $REMOTE_DIR/consts.bash" | cut -d "=" -f2)
-  export current_version
+function get_latest_version() {
+  remote_consts=$(wget -qO- "$REMOTE_DIR"/scripts/consts.bash)
+  # shellcheck disable=SC1090
+  source <(echo "$remote_consts")
 }
+
 
 function cleanup_on_error() {
   local exit_code=$?
   if [ "$exit_code" -ne 0 ]; then
     log "ERROR" "Something went wrong, cleaning up..."
-    rm -rf "$HOME_CONFIG_DIR"
+    rm -rf "$STARTENV_DIR"
     sed -i "/startEnv()/d" "$HOME/.bash_aliases"
     log "ERROR" "Clean up completed"
   fi
 }
 
 function main(){
-  get_current_version
-  log "INFO" "Installing startEnv version $current_version..."
+  get_latest_version
+  log "INFO" "Installing startEnv version $VERSION..."
   prompt_user_and_execute "Do you want to install dependencies?" install_dependencies
   prompt_user_and_execute "Do you want to download all the necessary scripts?" download_scripts
   prompt_user_and_execute "Do you want startEnv to create it's own tmux config?" create_tmux_config
   create_alias
   download_config
   figlet "startEnv"
-  # shellcheck disable=SC1091
-  . "${SCRIPTS_DIR}"/consts.bash
   log "INFO" "startEnv version $VERSION installed successfully!" 
 }
 
