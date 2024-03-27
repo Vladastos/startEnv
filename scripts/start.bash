@@ -46,7 +46,6 @@ function uninstall(){
     prompt_user_and_execute "Do you want to delete your config files?" "rm -rf $HOME/.config/startEnv"
     prompt_user_and_execute "Do you want to delete the alias from .bash_aliases?" "sed -i '/^startEnv()/d' $HOME/.bash_aliases"
     source "$HOME"/.bashrc
-    exit 0
 }
 
 function update(){
@@ -61,15 +60,16 @@ function update(){
     log "INFO" "Updating to version $latest_version..."
     prompt_user_and_execute "Do you want to uninstall the old version?" "uninstall"
     prompt_user_and_execute "Do you want to download all the necessary scripts?" "bash <(wget -qO- https://raw.githubusercontent.com/Vladastos/startEnv/main/setup.bash) && source ~/.bashrc"
-    exit 0
 }
 
 function main(){
     if [ "$1" == "--uninstall" ]; then
         uninstall
+        exit 0
     fi
     if [ "$1" == "--update" ]; then    
         update
+        exit 0
     fi
 
     check_dependencies

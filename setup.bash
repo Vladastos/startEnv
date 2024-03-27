@@ -12,7 +12,9 @@ function log() {
 function prompt_user_and_execute() {
   local question=$1
   local command=$2
+  echo -e "\n"
   read -r -p "$question [Y/n] " response
+  echo -e "\n"
   case $response in
     [yY][eE][sS]|[yY])
       eval "$command"
@@ -24,8 +26,10 @@ function prompt_user_and_execute() {
 }
 
 function download_single_file(){
-    log "INFO" "Downloading $1..."
     local file=$1
+    local file_name
+    file_name=$(basename "$file")
+    log "INFO" "Downloading $file_name..."
     local max_attempts=3
     local current_attempt=0
     until wget -q "$file" || [ $current_attempt -eq $max_attempts ]; do
