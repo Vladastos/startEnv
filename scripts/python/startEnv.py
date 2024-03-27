@@ -11,9 +11,9 @@ def log(message, level='info'):
     print('[{}] {}'.format(level.upper(), message))
 
 def readConfig():
-    if not os.path.exists(os.path.expanduser('~/.config/startEnv/config/config.json')):
+    if not os.path.exists(os.environ['CONFIG_FILE']):
         return None
-    with open(os.path.expanduser('~/.config/startEnv/config/config.json'), 'r') as config_file:
+    with open(os.environ['CONFIG_FILE'], 'r') as config_file:
         config = json.load(config_file)
     return config
 
@@ -100,10 +100,10 @@ class MainAction(argparse.Action):
         log(f"Attaching to session '{environment['environmentName']}'")
         os.system(f'tmux -L startEnv attach -t {environment["environmentName"]}')
 
-parser = argparse.ArgumentParser( prog = 'startEnv', description='Start an environment')
+parser = argparse.ArgumentParser( prog = 'startEnv', description='Start environments with tmux', epilog='For more information, visit https://github.com/Vladastos/startEnv')
 parser.add_argument('environment', action=MainAction, type=str, help='Name of the environment')
 parser.add_argument('-v', '--version', action='version', version='%(prog)s 0.1.0')
-parser.add_argument('-u', '--uninstall', action='store_true', help='Uninstall startEnv')
+parser.add_argument('--uninstall', action='store_true', help='Uninstall startEnv')
 parser.add_argument('-k', '--kill', action=KillAction, nargs=1, metavar='session', help='Kill a session started by startEnv')
 parser.add_argument('-l', '--list', action=ListAction, nargs=0, default=False, help='List environments')
 args = parser.parse_args()
