@@ -189,9 +189,12 @@ function welcome_screen(){
 
   }
   write_separator
-  center_lines "Welcome to"
-  figlet -f "$FONTS_DIR/${FONTS["3d"]}" -t -c startEnv
+  center_lines "Welcome to "
+  figlet -f "$FONTS_DIR/${FONTS[3d]}" -t -c startEnv
   center_lines "Version $VERSION "
+  echo " "
+  echo " "
+  center_lines "Run 'startEnv --help' to see all commands" "for more info visit https://github.com/Vladastos/startEnv"
   write_separator
 }
 
