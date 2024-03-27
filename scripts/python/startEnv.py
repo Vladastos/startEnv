@@ -5,6 +5,7 @@ import os
 import sys
 import argparse
 import argcomplete
+from jsonschema import validate
 
 def log(message, level='info'):
     valid_levels = ['debug', 'info', 'warning', 'error', 'critical']
@@ -13,12 +14,16 @@ def log(message, level='info'):
     print('[{}] {}'.format(level.upper(), message))
 
 def readConfig():
-    if not os.path.exists(os.environ['CONFIG_FILE']):
-        return None
+
+    with open(os.environ['CONFIG_SCHEMA'], 'r') as config_schema_file:
+        config_schema = json.load(config_schema_file)
+
     with open(os.environ['CONFIG_FILE'], 'r') as config_file:
         config = json.load(config_file)
-    return config
 
+    validate(config, config_schema)
+
+    return config
 def getEnvironmentList(config):
     environments = []
     for environment in config['environments']:

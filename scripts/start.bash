@@ -45,8 +45,12 @@ function uninstall(){
     prompt_user_and_execute "Do you want to delete the scripts?" "rm -rf $SCRIPTS_DIR" 
     prompt_user_and_execute "Do you want to delete your config files?" "rm -rf $HOME/.config/startEnv"
     prompt_user_and_execute "Do you want to delete the alias from .bash_aliases?" "sed -i '/^startEnv()/d' $HOME/.bash_aliases"
-    eval "sed -i '/^eval \"\$(register-python-argcomplete startEnv)\"/d' $HOME/.bashrc"
-    source "$HOME"/.bashrc
+    
+    # Remove added lines from .bashrc
+    local start_marker="####startEnv Auto-completion"
+    local end_marker="####end startEnv Auto-completion"
+    ##also remove markers and their lines
+    sed -i "/$start_marker/,/$end_marker/ { /$start_marker/d; /$end_marker/d; d }" "$HOME/.bashrc"
 }
 
 function update(){

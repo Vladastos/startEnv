@@ -1,25 +1,3 @@
 {
-  "environments": [
-    {
-      "environmentName": "",
-      "panes": [
-        {
-          "name": "",
-          "cmd": [
-            ""
-          ],
-          "style": ""
-        }
-      ],
-      "environment_options": {
-        "titleScreen": {
-          "title":"",
-          "style":""
-        } 
-      }
-    }
-  ],
-  "options":{
-    "disable_custom_tmux_config": false
-  }
+  
 }

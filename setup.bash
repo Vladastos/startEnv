@@ -141,9 +141,10 @@ function create_alias(){
 
 function download_config(){
   log "INFO" "Downloading config..."
+  mkdir -p "$CONFIG_DIR"
+  cd "$CONFIG_DIR" || exit
+  download_single_file "$REMOTE_CONFIG_DIR/schema.json"
   if [ ! -f "${CONFIG_DIR}/config.json" ]; then
-    mkdir -p "$CONFIG_DIR"
-    cd "$CONFIG_DIR" || exit
     download_single_file "$REMOTE_CONFIG_DIR/config.json"
   fi
 }
@@ -168,10 +169,9 @@ function cleanup_on_error() {
 }
 
 function welcome_screen(){
-  function write_separator() {
-    echo " "
-    printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' '='
-    echo " "
+  function draw_separator() {
+    local separator_char=$'='
+    printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' "$separator_char"
 
   }
   function center_lines() {
@@ -186,17 +186,45 @@ function welcome_screen(){
     done
 
   }
+  function center_lines_with_pipe() {
+    local lines=("$@")
+    local col_width=$((COLUMNS - 2))  # subtract 2 for pipe characters
+    ## Implement the code for the TODO comment
+    for line in "${lines[@]}"; do
+      local line_len=${#line}
+      local padding=$(((col_width - line_len + 1) / 2)) # calculate padding for uneven length lines
+      # print opening pipe
+      printf '|'
+      # print padding
+      printf '%*s' "$padding" ''
+      # print line
+      printf '%s' "$line"
+      # calculate remaining padding
+      local remaining_padding=$((col_width - line_len - padding))
+      # print remaining padding
+      printf '%*s' "$remaining_padding" ''
+      # print closing pipe
+      printf '|\n'
+    done
+  }
+
   
-  write_separator
-  center_lines "Welcome to "
-  echo " "
-  figlet -f "$FONTS_DIR"/3d.flf -t -c "startEnv"
-  echo " "
-  center_lines "Version $VERSION "
-  echo " "
-  echo " "
-  center_lines "Run 'startEnv --help' to see all commands" "for more info visit https://github.com/Vladastos/startEnv"
-  write_separator
+  draw_separator
+  center_lines_with_pipe " "
+  center_lines_with_pipe "Welcome to "
+  center_lines_with_pipe " "
+  
+  center_lines_with_pipe " "
+  center_lines_with_pipe "Version $VERSION "
+  center_lines_with_pipe " "
+  center_lines_with_pipe " "
+  center_lines_with_pipe "Run 'startEnv --help' to see all commands" "for more info visit https://github.com/Vladastos/startEnv"
+  center_lines_with_pipe " "
+  cemter_lines_with_pipe " "
+  draw_separator
+  echo ""
+  echo ""
+  echo ""
 }
 
 
@@ -206,10 +234,10 @@ function enable_auto_completion(){
     pip install argcomplete
     activate-global-python-argcomplete
     # shellcheck disable=SC2129
-    echo "" >> "$HOME"/.bashrc
     echo "####startEnv Auto-completion" >> "$HOME"/.bashrc
     # shellcheck disable=SC2016
     echo 'eval "$(register-python-argcomplete startEnv)" ' >> "$HOME"/.bashrc
+    echo "####end startEnv Auto-completion" >> "$HOME"/.bashrc
     # shellcheck disable=SC1091
     source "$HOME"/.bash_completion
   else :

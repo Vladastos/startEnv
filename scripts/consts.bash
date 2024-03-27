@@ -1,4 +1,4 @@
-export VERSION="0.2.0"
+export VERSION="0.2.1"
 export DEPENDENCIES=(tmux python3 pip git wget figlet)
 
 export STARTENV_DIR="$HOME/.config/startEnv"
@@ -11,6 +11,7 @@ export VENV_DIR="$SCRIPTS_DIR/python/venv"
 export REQUIREMENTS_TXT="$SCRIPTS_DIR/python/requirements.txt"
 export TMUX_CONFIG_DIR="${STARTENV_DIR}/tmux"
 export TMUX_CONF="$STARTENV_DIR/tmux/tmux.conf"
+export CONFIG_SCHEMA="$CONFIG_DIR/schema.json"
 
 export FONTS_DIR="$STARTENV_DIR/figlet-fonts"
 declare -A FONTS=(
@@ -24,5 +25,3 @@ export REMOTE_SCRIPTS_DIR="${REMOTE_DIR}/scripts"
 export REMOTE_CONFIG_DIR="$REMOTE_DIR/config"
 export REMOTE_TMUX_CONFIG_DIR="${REMOTE_DIR}/tmux"
 export REMOTE_FONTS_DIR="${REMOTE_DIR}/figlet-fonts"
-
-export FILES=("$CONFIG_FILE" "$START_ENV_PY" "$REQUIREMENTS_TXT" "$TMUX_CONF")

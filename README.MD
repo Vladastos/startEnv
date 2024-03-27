@@ -24,7 +24,9 @@ Run `startEnv --help` or `startEnv -h` for more information.
 
 Run `startEnv --kill` or `startEnv -k` to kill a session started by strtEnv.
 
-Run `startEnv --uninstall` or `startEnv -u` to uninstall startEnv.
+Run `startEnv --uninstall` to uninstall startEnv.
+
+Run `startEnv --update` to see the version of startEnv.
 
 Remember to configure your environment before starting it.
 
@@ -51,28 +53,28 @@ the `config/config.json` file is structured as follows:
 
 ```json
 {
-    "environments": [  //List of environments
+    "environments": [
         {
-            "environmentName": "", //Name of the environment
-            "panes": [ //List of panes
+            "environmentName": "string",
+            "panes": [
                 {
-                    "name": "", //Name of the pane
-                    "cmd": [ //List of commands to run in the pane
-                        ""
+                    "name": "string",
+                    "cmd": [
+                        "string"
                     ],
-                    "pane_style": "" //Style of the pane (not yet implemented)
+                    "pane_style": "string" //(not yet implemented)
                 }
             ],
-            "environment_options": {  //Options for the pane
+            "environment_options": {
                 "titleScreen": { //Title pane, if not set, it will not be created
-                    "title":"",
-                    "style":""
+                    "title":"string",
+                    "style":"" //(not yet implemented)
                 } 
             }
         }
     ],
     "options":{
-        "disable_custom_tmux_config": false //Set to true if you want startEnv to use your tmux config (not yet implemented)
+        "disable_custom_tmux_config": false //(not yet implemented)
     }
 }
 ```
