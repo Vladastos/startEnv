@@ -16,6 +16,7 @@ function log() {
 function prompt_user_and_execute() {
   local question=$1
   local command=$2
+  local alternative_command=$3
   echo -e "\n"
   read -r -p "$question [Y/n] " response
   echo -e "\n"
@@ -24,7 +25,7 @@ function prompt_user_and_execute() {
       eval "$command"
       ;;
     *)
-      exit 1
+      eval "$alternative_command"
       ;;
   esac
 }
@@ -213,14 +214,20 @@ function welcome_screen(){
   center_lines_with_pipe " "
   center_lines_with_pipe "Welcome to "
   center_lines_with_pipe " "
-  
+  # Display centered figlet output
+  figlet_output=$(figlet -d "${FONTS_DIR}" -f "${FONTS[3d]}" "startEnv")
+  IFS=$'\n' lines=($figlet_output)
+  for line in "${lines[@]}"; do
+    center_lines_with_pipe "$line"
+  done
   center_lines_with_pipe " "
   center_lines_with_pipe "Version $VERSION "
   center_lines_with_pipe " "
+  center_lines_with_pipe "-"
   center_lines_with_pipe " "
   center_lines_with_pipe "Run 'startEnv --help' to see all commands" "for more info visit https://github.com/Vladastos/startEnv"
   center_lines_with_pipe " "
-  cemter_lines_with_pipe " "
+  center_lines_with_pipe " "
   draw_separator
   echo ""
   echo ""
@@ -248,13 +255,13 @@ function enable_auto_completion(){
 function main(){
   # shellcheck disable=SC1091
   log "INFO" "Installing startEnv version $VERSION..."
-  prompt_user_and_execute "Do you want to install dependencies?" install_dependencies
+  prompt_user_and_execute "Do you want to install dependencies?" install_dependencies exit 0
   prompt_user_and_execute "Do you want to enable auto-completion for startEnv?" enable_auto_completion
   prompt_user_and_execute "Do you want to download all the necessary scripts?" download_scripts
-  prompt_user_and_execute "Do you want startEnv to create it's own tmux config?" create_tmux_config
+  prompt_user_and_execute "Do you want startEnv to create it's own tmux config?" create_tmux_config exit 0
   create_alias
   download_config
-  prompt_user_and_execute "Do you want to download custom figlet fonts to $FONTS_DIR?" download_fonts
+  prompt_user_and_execute "Do you want to download custom figlet fonts to $FONTS_DIR?" download_fonts exit 0
   welcome_screen
 }
 
